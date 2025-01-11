@@ -1,0 +1,144 @@
+﻿@{
+    ViewData["Title"] = "Payment";
+
+    // Safely parse TotalAmount from ViewData
+    decimal totalAmount = ViewData["TotalAmount"] != null
+        ? Convert.ToDecimal(ViewData["TotalAmount"])
+        : 0;
+}
+
+<div class="container mt-5">
+    <h2 class="text-gradient text-center mb-4">Proceed to Payment</h2>
+
+    <!-- Total Amount -->
+    <div class="alert alert-info shadow-sm text-center fs-5">
+        <strong>Total Amount: </strong> @totalAmount.ToString("C")
+    </div>
+
+    <!-- Payment Form -->
+    <form asp-action="Checkout" method="post" class="shadow-sm p-4 rounded bg-white">
+        <!-- Payment Method -->
+        <div class="mb-4">
+            <label for="PaymentMethod" class="form-label text-primary fw-bold">Select Payment Method</label>
+            <select name="PaymentMethod" id="PaymentMethod" class="form-select shadow-sm" required>
+                <option value="Cash">Cash on Delivery</option>
+                <option value="Card">Credit/Debit Card</option>
+            </select>
+        </div>
+
+        <!-- Card Details Section -->
+        <div id="CardDetails" style="display: none;">
+            <div class="mb-3">
+                <label for="CardNumber" class="form-label text-primary fw-bold">Card Number</label>
+                <input type="text"
+                       name="CardNumber"
+                       id="CardNumber"
+                       class="form-control shadow-sm"
+                       placeholder="Enter your card number" />
+            </div>
+            <div class="mb-3">
+                <label for="ExpiryDate" class="form-label text-primary fw-bold">Expiry Date</label>
+                <input type="text"
+                       name="ExpiryDate"
+                       id="ExpiryDate"
+                       class="form-control shadow-sm"
+                       placeholder="MM/YY" />
+            </div>
+            <div class="mb-3">
+                <label for="CVV" class="form-label text-primary fw-bold">CVV</label>
+                <input type="text"
+                       name="CVV"
+                       id="CVV"
+                       class="form-control shadow-sm"
+                       placeholder="CVV" />
+            </div>
+        </div>
+
+        <!-- Confirm and Pay Button -->
+        <button type="submit" class="btn btn-gradient w-100 py-2 mt-3">
+            Confirm and Pay
+        </button>
+    </form>
+</div>
+
+<script>
+    // Show card details if "Card" payment method is selected
+    const paymentMethod = document.getElementById("PaymentMethod");
+    const cardDetails = document.getElementById("CardDetails");
+
+    paymentMethod.addEventListener("change", function () {
+        if (this.value === "Card") {
+            cardDetails.style.display = "block";
+        } else {
+            cardDetails.style.display = "none";
+        }
+    });
+</script>
+
+<style>
+    /* General Styling */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .fw-bold {
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-size: 1rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    .form-select {
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    /* Button Styling */
+    .btn-gradient {
+        background: linear-gradient(to right, #43a047, #66bb6a);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 160, 71, 0.6);
+        }
+
+    /* Card Details Styling */
+    #CardDetails {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive Layout */
+    .container {
+        max-width: 600px;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+</style>

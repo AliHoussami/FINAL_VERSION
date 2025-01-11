@@ -1,0 +1,147 @@
+﻿@model projet_info_finale.Models.LoginSignupModel
+
+@{
+    ViewData["Title"] = "Login or Signup";
+    var activeTab = ViewBag.ActiveTab ?? "";
+}
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="left-container">
+        <div class="glass-card text-center p-4">
+            <h2 class="mb-4 text-gradient">Welcome to LEB.EATS!</h2>
+            <p class="mb-4 text-light">Choose an option to get started:</p>
+            <div class="d-grid gap-3 mb-4">
+                <button class="btn btn-gradient btn-lg" id="show-login">Login</button>
+                <button class="btn btn-gradient btn-lg" id="show-signup">Signup</button>
+            </div>
+
+            <!-- Admin Login -->
+            <a href="@Url.Action("RestaurantManagement", "Admin")" class="btn btn-danger btn-lg mb-4">
+                Admin Panel
+            </a>
+
+            <!-- Login Form -->
+            <div id="login-form" class="form-container mt-4" style="display: @(activeTab == "login" ? "block" : "none");">
+                <h2 class="mb-3 text-gradient">Login</h2>
+                <form asp-controller="Account" asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="input-container">
+                        <i class="fa fa-user"></i>
+                        <input type="text" name="Username" class="form-control" placeholder="Username" value="@Model.Login?.Username" required />
+                    </div>
+                    <div class="input-container">
+                        <i class="fa fa-lock"></i>
+                        <input type="password" name="Password" class="form-control" placeholder="Password" required />
+                    </div>
+                    <button type="submit" class="btn btn-gradient w-100 mt-3">Login</button>
+                </form>
+                <a asp-action="LoginWithGoogle" asp-controller="Account" class="btn btn-google w-100 mt-3">
+                    <i class="fa fa-google"></i> Login with Google
+                </a>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signup-form" class="form-container mt-4" style="display: @(activeTab == "signup" ? "block" : "none");">
+                <h2 class="mb-3 text-gradient">Signup</h2>
+                <form asp-controller="Account" asp-action="Signup" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group mb-3">
+                        <label for="FirstName" class="text-light">First Name</label>
+                        <input type="text" name="FirstName" class="form-control" placeholder="First Name" value="@Model.Signup?.FirstName" required />
+                    </div>
+                    <!-- Additional fields styled similarly -->
+                    <button type="submit" class="btn btn-gradient w-100 mt-3">Signup</button>
+                </form>
+                <a asp-action="SignupWithGoogle" asp-controller="Account" class="btn btn-google w-100 mt-3">
+                    <i class="fa fa-google"></i> Signup with Google
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Background */
+    body {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/IMAGE/front-view-veggie-burger-with-black-buns-cutting-board-with-copy-space.jpg') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        height: 100vh;
+        color: white;
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 30px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .btn-gradient:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.6);
+        }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(15px);
+        padding: 30px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    }
+
+    .input-container {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+        .input-container i {
+            position: absolute;
+            top: 12px;
+            left: 10px;
+            color: #aaa;
+        }
+
+    .form-control {
+        padding-left: 35px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        color: white;
+    }
+
+    .btn-google {
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 30px;
+    }
+
+        .btn-google:hover {
+            background: #b12a37;
+        }
+</style>
+
+@section Scripts {
+    <script>
+        document.getElementById("show-login").addEventListener("click", function () {
+            document.getElementById("login-form").style.display = "block";
+            document.getElementById("signup-form").style.display = "none";
+        });
+
+        document.getElementById("show-signup").addEventListener("click", function () {
+            document.getElementById("signup-form").style.display = "block";
+            document.getElementById("login-form").style.display = "none";
+        });
+    </script>
+}

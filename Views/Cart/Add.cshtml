@@ -1,0 +1,100 @@
+﻿@model projet_info_finale.Models.MenuItem
+
+@{
+    ViewData["Title"] = "Add to Cart";
+}
+
+<div class="container mt-5">
+    <h2 class="text-gradient mb-4">Add <strong>@Model.ItemName</strong> to Cart</h2>
+
+    <form asp-action="Add" method="post" class="shadow-sm p-4 rounded bg-white">
+        <input type="hidden" name="menuItemId" value="@Model.MenuItemID" />
+
+        <!-- Customizations -->
+        <div class="mb-4">
+            <label for="customizations" class="form-label text-primary fw-bold">Customizations</label>
+            <textarea name="customizations"
+                      id="customizations"
+                      class="form-control shadow-sm"
+                      placeholder="Add extra notes or ingredients"></textarea>
+        </div>
+
+        <!-- Quantity -->
+        <div class="mb-4">
+            <label for="quantity" class="form-label text-primary fw-bold">Quantity</label>
+            <input type="number"
+                   name="quantity"
+                   id="quantity"
+                   class="form-control shadow-sm"
+                   value="1"
+                   min="1"
+                   required />
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-gradient px-4 py-2">
+                Add to Cart
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* General Styling */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+    }
+
+    .container {
+        max-width: 600px;
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .fw-bold {
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-size: 1rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    /* Button Styling */
+    .btn-gradient {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.6);
+        }
+
+    /* Form Styling */
+    form {
+        background-color: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+</style>

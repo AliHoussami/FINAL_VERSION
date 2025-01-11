@@ -1,0 +1,134 @@
+﻿@model IEnumerable<projet_info_finale.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Your Cart";
+}
+
+<div class="container mt-5">
+    <h2 class="text-gradient mb-4">Your Cart</h2>
+
+    <!-- Success Message -->
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success shadow-sm">
+            @TempData["Message"]
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <table class="table table-hover table-bordered shadow-sm">
+            <thead class="table-header">
+                <tr>
+                    <th>Item</th>
+                    <th>Customizations</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.MenuItem.ItemName</td>
+                        <td>@(item.Customizations ?? "No customizations")</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.TotalPrice.ToString("C")</td>
+                        <td>
+                            <form asp-action="Remove" asp-route-cartItemId="@item.CartItemID" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Remove
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Proceed to Payment Button -->
+        <form asp-action="ProceedToPayment" method="get" class="mt-4">
+            <button type="submit" class="btn btn-gradient w-100 py-2">
+                Proceed to Payment
+            </button>
+        </form>
+    }
+    else
+    {
+        <div class="text-center mt-5">
+            <p class="text-muted fs-4">Your cart is empty.</p>
+        </div>
+    }
+</div>
+
+<style>
+    /* General Styling */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+    }
+
+    .container {
+        max-width: 800px;
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Table Styling */
+    .table {
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table-header {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        color: white;
+        font-size: 1rem;
+    }
+
+    .fw-bold {
+        font-weight: 600;
+    }
+
+    /* Button Styling */
+    .btn-gradient {
+        background: linear-gradient(to right, #43a047, #66bb6a);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 160, 71, 0.6);
+        }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.6);
+        }
+
+    /* Empty Cart Styling */
+    .text-muted {
+        font-size: 1.25rem;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+</style>

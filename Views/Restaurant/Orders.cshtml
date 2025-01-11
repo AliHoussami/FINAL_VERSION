@@ -1,0 +1,62 @@
+﻿@model IEnumerable<projet_info_finale.Models.Order>
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<h2 class="text-center mt-4">Customer Orders</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Message"]
+    </div>
+}
+
+<div class="container mt-4">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.OrderID</td>
+                    <td>@order.User.FirstName @order.User.LastName</td>
+                    <td>@order.TotalPrice.ToString("C")</td>
+                    <td>@order.OrderStatus</td>
+                    <td>
+                        <form asp-action="UpdateOrderStatus" method="post" style="display:inline;">
+                            <input type="hidden" name="orderId" value="@order.OrderID" />
+                            <select name="status" class="form-select d-inline w-auto">
+                                @foreach (var status in new[] { "Pending", "Accepted", "Preparing", "Delivering", "Completed" })
+                                {
+                                    <option value="@status" selected="@(order.OrderStatus == status ? "selected" : null)">@status</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <strong>Order Items:</strong>
+                        <ul>
+                            @foreach (var item in order.OrderItems)
+                            {
+                                <li>@item.MenuItem.ItemName - Quantity: @item.Quantity - Price: @item.ItemPrice.ToString("C")</li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

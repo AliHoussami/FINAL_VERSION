@@ -1,0 +1,97 @@
+﻿@model IEnumerable<projet_info_finale.Models.Restaurant>
+
+@{
+    ViewData["Title"] = "Restaurants";
+}
+
+<h2 class="text-center mt-4 text-gradient">Explore Restaurants</h2>
+<p class="text-center text-muted mb-4">Discover the best places to dine, curated for you.</p>
+
+<div class="container">
+    <div class="row">
+        @foreach (var restaurant in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card restaurant-card shadow-sm">
+                    <div class="card-header restaurant-header text-center">
+                        <h5 class="restaurant-title">@restaurant.RestaurantName</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="card-text text-muted">@restaurant.Description</p>
+                        <a asp-action="Details" asp-route-id="@restaurant.RestaurantID" class="btn btn-gradient mt-3">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Background and Font Styling */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to bottom, #f9f9f9, #e9ecef);
+        color: #333;
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Card Styling */
+    .restaurant-card {
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        background: #fff;
+    }
+
+        .restaurant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+    .restaurant-header {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        color: #fff;
+        border-radius: 10px 10px 0 0;
+        padding: 10px 0;
+    }
+
+    .restaurant-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    /* Button Styling */
+    .btn-gradient {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s;
+    }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.6);
+        }
+
+    /* Responsive Spacing */
+    .col-md-4 {
+        display: flex;
+        justify-content: center;
+    }
+
+    .restaurant-card {
+        width: 100%;
+        max-width: 350px;
+    }
+</style>
