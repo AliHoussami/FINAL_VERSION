@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using projet_info_finale.Models;
@@ -17,7 +18,6 @@ namespace projet_info_finale
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSession();
-
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
             // Register ApplicationDbContext with MySQL
@@ -28,11 +28,24 @@ namespace projet_info_finale
                 )
             );
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie();
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+            })
+            .AddCookie()
+            .AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+                googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+                googleOptions.CallbackPath = "/signin-google"; // Set this to the old URL format
+            });
 
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
+
+            //builder.Services.AddScoped<IPasswordHasher<Users>, PasswordHasher<User>>();
 
             var app = builder.Build();
 
