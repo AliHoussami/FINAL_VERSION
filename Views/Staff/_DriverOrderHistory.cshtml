@@ -1,0 +1,46 @@
+@model IEnumerable<projet_info_finale.Models.Order>
+
+<div class="mt-4">
+    <h3>Order History</h3>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No completed orders found.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Restaurant</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Completion Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td>@order.OrderID</td>
+                            <td>@order.User.FirstName @order.User.LastName</td>
+                            <td>@order.Restaurant.RestaurantName</td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    @foreach (var item in order.OrderItems)
+                                    {
+                                        <li>@item.MenuItem.ItemName x @item.Quantity</li>
+                                    }
+                                </ul>
+                            </td>
+                            <td>$@order.TotalPrice.ToString("F2")</td>
+                            <td>@order.OrderDate.ToString("g")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

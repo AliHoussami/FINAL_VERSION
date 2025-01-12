@@ -8,7 +8,8 @@ namespace projet_info_finale.Models
         Customer,
         Driver,
         Admin,
-        KitchenStaff
+        KitchenStaff,
+        Accepter
     }
 
     public class Users
@@ -37,7 +38,7 @@ namespace projet_info_finale.Models
         public string PasswordHash { get; set; }
 
         [Required]
-        [Column(TypeName = "enum('Customer','Driver','Admin','KitchenStaff')")]
+        [Column(TypeName = "enum('Customer','Driver','Admin','KitchenStaff','Accepter')")]
         public UserType UserType { get; set; }
 
         [StringLength(255)]

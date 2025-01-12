@@ -54,19 +54,39 @@
                             <td>$@order.TotalPrice.ToString("F2")</td>
                             <td>@order.OrderStatus</td>
                             <td>
-                                <select class="form-select status-select" data-order-id="@order.OrderID">
-                                    <option value="Pending" selected="@(order.OrderStatus == OrderStatus.Pending)">Pending</option>
-                                    <option value="Preparing" selected="@(order.OrderStatus == OrderStatus.Preparing)">Preparing</option>
-                                    <option value="OutForDelivery" selected="@(order.OrderStatus == OrderStatus.OutForDelivery)">Out for Delivery</option>
-                                    <option value="Completed" selected="@(order.OrderStatus == OrderStatus.Completed)">Completed</option>
-                                    <option value="Cancelled" selected="@(order.OrderStatus == OrderStatus.Cancelled)">Cancelled</option>
-                                </select>
-
+                                @if (ViewBag.StaffRole == UserType.Accepter)
+                                {
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-success process-order" data-order-id="@order.OrderID" data-action="accept">Accept</button>
+                                        <button class="btn btn-danger process-order" data-order-id="@order.OrderID" data-action="reject">Reject</button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <select class="form-select status-select" data-order-id="@order.OrderID">
+                                        <option value="Pending" selected="@(order.OrderStatus == OrderStatus.Pending)">Pending</option>
+                                        <option value="Preparing" selected="@(order.OrderStatus == OrderStatus.Preparing)">Preparing</option>
+                                        <option value="OutForDelivery" selected="@(order.OrderStatus == OrderStatus.OutForDelivery)">Out for Delivery</option>
+                                        <option value="Completed" selected="@(order.OrderStatus == OrderStatus.Completed)">Completed</option>
+                                        <option value="Cancelled" selected="@(order.OrderStatus == OrderStatus.Cancelled)">Cancelled</option>
+                                    </select>
+                                }
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+        </div>
+    }
+
+    @if (ViewBag.StaffRole == UserType.Driver)
+    {
+        <div id="orderHistory">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3>Order History</h3>
+                <button class="btn btn-primary" id="loadHistory">Show History</button>
+            </div>
+            <div id="historyContent"></div>
         </div>
     }
 </div>
@@ -91,6 +111,40 @@
                         alert('An error occurred: ' + error);
                     });
             });
+
+            // New handler for Accepter buttons
+            $('.process-order').click(function() {
+                const orderId = $(this).data('order-id');
+                const action = $(this).data('action');
+
+                $.post('/Staff/ProcessOrder', { orderId: orderId, action: action })
+                    .done(function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert('Failed to process order: ' + response.message);
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        alert('An error occurred: ' + error);
+                    });
+            });
         });
     </script>
+
+    @if (ViewBag.StaffRole == UserType.Driver)
+    {
+        <script>
+            $('#loadHistory').click(function() {
+                $.get('/Staff/GetDriverOrderHistory', { driverId: @ViewBag.StaffId })
+                    .done(function(response) {
+                        $('#historyContent').html(response);
+                    })
+                    .fail(function(xhr, status, error) {
+                        alert('Failed to load order history: ' + error);
+                    });
+            });
+        </script>
+    }
 }

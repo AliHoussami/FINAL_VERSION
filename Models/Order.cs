@@ -17,6 +17,7 @@
         public int RestaurantID { get; set; }
         public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending; // Set default value
         public decimal TotalPrice { get; set; }
+        public DateTime OrderDate { get; set; } = DateTime.Now; // Add this property
         public Users User { get; set; }
         public Restaurant Restaurant { get; set; }
         

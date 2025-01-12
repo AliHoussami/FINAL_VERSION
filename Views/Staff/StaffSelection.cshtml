@@ -20,7 +20,9 @@
                     else
                     {
                         <div class="list-group">
-                            @foreach (var user in Model.Where(u => u.UserType == UserType.Driver || u.UserType == UserType.KitchenStaff))
+                            @foreach (var user in Model.Where(u => u.UserType == UserType.Driver || 
+                                                                 u.UserType == UserType.KitchenStaff || 
+                                                                 u.UserType == UserType.Accepter))
                             {
                                 <div class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>

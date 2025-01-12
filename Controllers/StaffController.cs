@@ -44,6 +44,8 @@ namespace projet_info_finale.Controllers
                             (o.OrderStatus == OrderStatus.Pending || o.OrderStatus == OrderStatus.Preparing) :
                         staff.UserType == UserType.Driver ?
                             (o.OrderStatus == OrderStatus.Preparing || o.OrderStatus == OrderStatus.OutForDelivery) :
+                        staff.UserType == UserType.Accepter ?
+                            (o.OrderStatus == OrderStatus.Pending) :  // Show only new Pending orders to Accepter
                             false)
                     .ToListAsync();
 
@@ -62,7 +64,9 @@ namespace projet_info_finale.Controllers
             try
             {
                 var staffMembers = await _context.Users
-                    .Where(u => u.UserType == UserType.Driver || u.UserType == UserType.KitchenStaff)
+                    .Where(u => u.UserType == UserType.Driver || 
+                               u.UserType == UserType.KitchenStaff || 
+                               u.UserType == UserType.Accepter)
                     .ToListAsync();
 
                 if (!staffMembers.Any())
@@ -111,8 +115,59 @@ namespace projet_info_finale.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ProcessOrder(int orderId, string action)
+        {
+            try
+            {
+                var order = await _context.Orders.FindAsync(orderId);
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Order not found." });
+                }
 
+                switch (action)
+                {
+                    case "accept":
+                        order.OrderStatus = OrderStatus.Pending;  // Keep as Pending for KitchenStaff
+                        break;
+                    case "reject":
+                        order.OrderStatus = OrderStatus.Cancelled;
+                        break;
+                    default:
+                        return Json(new { success = false, message = "Invalid action." });
+                }
 
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = $"Order {action}ed successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error processing order {orderId}: {ex.Message}");
+                return Json(new { success = false, message = "An error occurred while processing the order." });
+            }
+        }
 
+        public async Task<IActionResult> GetDriverOrderHistory(int driverId)
+        {
+            try
+            {
+                var completedOrders = await _context.Orders
+                    .Include(o => o.User)
+                    .Include(o => o.Restaurant)
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.MenuItem)
+                    .Where(o => o.OrderStatus == OrderStatus.Completed)
+                    .OrderByDescending(o => o.OrderID)
+                    .ToListAsync();
+
+                return PartialView("_DriverOrderHistory", completedOrders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error fetching driver order history: {ex.Message}");
+                return Json(new { success = false, message = "Failed to load order history." });
+            }
+        }
     }
 }
