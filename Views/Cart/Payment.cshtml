@@ -17,6 +17,20 @@
 
     <!-- Payment Form -->
     <form asp-action="Checkout" method="post" class="shadow-sm p-4 rounded bg-white">
+        <!-- Delivery Details -->
+        <div class="mb-4">
+            <label for="deliveryAddress" class="form-label text-primary fw-bold">Delivery Address</label>
+            <input type="text" name="deliveryAddress" id="deliveryAddress" class="form-control shadow-sm" required />
+        </div>
+        <div class="mb-4">
+            <label for="deliveryCity" class="form-label text-primary fw-bold">Delivery City</label>
+            <input type="text" name="deliveryCity" id="deliveryCity" class="form-control shadow-sm" required />
+        </div>
+        <div class="mb-4">
+            <label for="deliveryPostalCode" class="form-label text-primary fw-bold">Postal Code</label>
+            <input type="text" name="deliveryPostalCode" id="deliveryPostalCode" class="form-control shadow-sm" required />
+        </div>
+
         <!-- Payment Method -->
         <div class="mb-4">
             <label for="PaymentMethod" class="form-label text-primary fw-bold">Select Payment Method</label>

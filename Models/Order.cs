@@ -5,11 +5,16 @@
         public int OrderID { get; set; }
         public int UserID { get; set; }
         public int RestaurantID { get; set; }
-        public string OrderStatus { get; set; } // Pending, Accepted, Preparing, Delivering
+        public string OrderStatus { get; set; }
         public decimal TotalPrice { get; set; }
+
+        // Delivery details
+        public string DeliveryAddress { get; set; }
+        public string DeliveryCity { get; set; }
+        public string DeliveryPostalCode { get; set; }
+
         public Users User { get; set; }
         public Restaurant Restaurant { get; set; }
-        
         public ICollection<OrderItem> OrderItems { get; set; }
     }
 

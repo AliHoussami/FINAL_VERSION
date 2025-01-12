@@ -17,6 +17,9 @@
         <p><strong>Customer:</strong> @(Model?.User?.FirstName ?? "Unknown") @(Model?.User?.LastName ?? "User")</p>
         <p><strong>Restaurant:</strong> @(Model?.Restaurant?.RestaurantName ?? "Unknown")</p>
         <p><strong>Date:</strong> @DateTime.Now.ToString("f")</p>
+        <p><strong>Delivery Address:</strong> @(Model?.DeliveryAddress ?? "Not Provided")</p>
+        <p><strong>Delivery City:</strong> @(Model?.DeliveryCity ?? "Not Provided")</p>
+        <p><strong>Delivery Postal Code:</strong> @(Model?.DeliveryPostalCode ?? "Not Provided")</p>
         <p><strong>Total Price:</strong> @(Model?.TotalPrice.ToString("C") ?? "0.00")</p>
         <p>
             <strong>Status:</strong>

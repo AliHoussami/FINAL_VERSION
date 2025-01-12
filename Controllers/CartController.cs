@@ -17,15 +17,25 @@ namespace projet_info_finale.Controllers
         // GET: /Cart/Index
         public async Task<IActionResult> Index()
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["Error"] = "You must be logged in to view your cart.";
+                return RedirectToAction("LoginSignup", "Account");
+            }
+
+            int parsedUserId = int.Parse(userId);
+
             var cartItems = await _context.CartItems
+                .Where(ci => ci.UserID == parsedUserId) // Fetch cart items for the logged-in user
                 .Include(ci => ci.MenuItem)
                 .ToListAsync();
 
             return View(cartItems);
         }
 
-        // GET: /Cart/Add/{menuItemId}using Microsoft.EntityFrameworkCore;
-
+        // GET: /Cart/Add/{menuItemId}
         public async Task<IActionResult> Add(int menuItemId)
         {
             var menuItem = await _context.MenuItems.FindAsync(menuItemId);
@@ -74,7 +84,6 @@ namespace projet_info_finale.Controllers
             return RedirectToAction("Index");
         }
 
-
         // POST: /Cart/Remove/{cartItemId}
         [HttpPost]
         public async Task<IActionResult> Remove(int cartItemId)
@@ -94,9 +103,8 @@ namespace projet_info_finale.Controllers
 
         // POST: /Cart/Checkout
         [HttpPost]
-        public async Task<IActionResult> Checkout(string paymentMethod, string? cardNumber, string? expiryDate, string? cvv)
+        public async Task<IActionResult> Checkout(string paymentMethod, string deliveryAddress, string deliveryCity, string deliveryPostalCode, string? cardNumber, string? expiryDate, string? cvv)
         {
-            // Fetch the current user's ID from authentication claims
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
@@ -109,7 +117,7 @@ namespace projet_info_finale.Controllers
 
             // Fetch cart items for the logged-in user
             var cartItems = await _context.CartItems
-                .Where(ci => ci.UserID == parsedUserId) // Ensure cart items belong to the logged-in user
+                .Where(ci => ci.UserID == parsedUserId)
                 .Include(ci => ci.MenuItem)
                 .ToListAsync();
 
@@ -120,6 +128,9 @@ namespace projet_info_finale.Controllers
             }
 
             decimal totalAmount = cartItems.Sum(ci => ci.TotalPrice);
+
+            // Determine the restaurant ID dynamically (assuming all items in the cart belong to the same restaurant)
+            int restaurantId = cartItems.First().MenuItem.RestaurantID;
 
             // Simulate payment logic
             if (paymentMethod == "Card")
@@ -140,10 +151,13 @@ namespace projet_info_finale.Controllers
             // Create a new order
             var order = new Order
             {
-                UserID = parsedUserId, // Set the correct UserID
-                RestaurantID = 1, // Replace with actual logic to determine the restaurant ID
+                UserID = parsedUserId,
+                RestaurantID = restaurantId,
                 OrderStatus = "Pending",
                 TotalPrice = totalAmount,
+                DeliveryAddress = deliveryAddress,
+                DeliveryCity = deliveryCity,
+                DeliveryPostalCode = deliveryPostalCode,
                 OrderItems = cartItems.Select(ci => new OrderItem
                 {
                     MenuItemID = ci.MenuItemID,
@@ -161,10 +175,10 @@ namespace projet_info_finale.Controllers
             // Save changes
             await _context.SaveChangesAsync();
 
-            // Redirect to confirmation page
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
         }
 
+        // GET: /Cart/OrderConfirmation
         public async Task<IActionResult> OrderConfirmation(int orderId)
         {
             var order = await _context.Orders
@@ -181,9 +195,24 @@ namespace projet_info_finale.Controllers
 
             return View(order);
         }
+
+        // GET: /Cart/ProceedToPayment
         public async Task<IActionResult> ProceedToPayment()
         {
-            var cartItems = await _context.CartItems.Include(ci => ci.MenuItem).ToListAsync();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["Error"] = "You must be logged in to proceed to payment.";
+                return RedirectToAction("LoginSignup", "Account");
+            }
+
+            int parsedUserId = int.Parse(userId);
+
+            var cartItems = await _context.CartItems
+                .Where(ci => ci.UserID == parsedUserId)
+                .Include(ci => ci.MenuItem)
+                .ToListAsync();
 
             if (!cartItems.Any())
             {
@@ -199,6 +228,5 @@ namespace projet_info_finale.Controllers
 
             return View("Payment");
         }
-
     }
 }
