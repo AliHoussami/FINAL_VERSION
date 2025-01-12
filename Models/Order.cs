@@ -7,6 +7,14 @@
         public int RestaurantID { get; set; }
         public string OrderStatus { get; set; } // Pending, Accepted, Preparing, Delivering
         public decimal TotalPrice { get; set; }
+        public DateTime? OrderDate { get; set; }
+        
+        // Fix the property declarations by removing the initialization
+        public string DeliveryAddress { get; set; }
+        public string DeliveryCity { get; set; }
+        public string DeliveryPostalCode { get; set; }
+
+        // Navigation properties
         public Users User { get; set; }
         public Restaurant Restaurant { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; }

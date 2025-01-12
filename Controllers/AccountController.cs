@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore; // Add this at the top with other using statements
 
 namespace projet_info_finale.Controllers
 {
@@ -31,36 +32,100 @@ namespace projet_info_finale.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(LoginModel model)
+        public async Task<IActionResult> Login(LoginModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.ActiveTab = "login";
-                return View("LoginSignup", new LoginSignupModel { Login = model });
-            }
-
             try
             {
-                var user = _context.Users.FirstOrDefault(u => u.Username == model.Username);
+                _logger.LogInformation($"Starting login process for username: {model.Username}");
 
-                if (user == null || !VerifyPassword(model.Password, user.PasswordHash))
+                if (!ModelState.IsValid)
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid username or password.");
-                    ViewBag.ActiveTab = "login";
+                    _logger.LogWarning("Model state is invalid");
                     return View("LoginSignup", new LoginSignupModel { Login = model });
                 }
 
-                // Successful login - redirect to Home/Index
-                return RedirectToAction("Index", "Home");
-            }
-            catch (System.Exception ex)
-            {
-                _logger.LogError($"Error during login: {ex.Message}");
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
-            }
+                // More efficient query
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .Where(u => u.Username == model.Username)
+                    .Select(u => new { 
+                        u.UserID, 
+                        u.Username, 
+                        u.PasswordHash, 
+                        u.UserType 
+                    })
+                    .FirstOrDefaultAsync();
+                
+                if (user == null)
+                {
+                    _logger.LogWarning($"No user found with username: {model.Username}");
+                    ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                    return View("LoginSignup", new LoginSignupModel { Login = model });
+                }
 
-            ViewBag.ActiveTab = "login";
-            return View("LoginSignup", new LoginSignupModel { Login = model });
+                _logger.LogInformation($"Found user with type: {user.UserType}");
+
+                if (!VerifyPassword(model.Password, user.PasswordHash))
+                {
+                    _logger.LogWarning($"Invalid password for username: {model.Username}");
+                    ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                    return View("LoginSignup", new LoginSignupModel { Login = model });
+                }
+
+                // Create claims
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Role, user.UserType)
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(24)
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                _logger.LogInformation($"Successfully signed in user. Redirecting based on type: {user.UserType}");
+
+                // Explicit redirect logic with logging
+                IActionResult redirectResult;
+                switch (user.UserType.Trim())  // Add Trim() to handle any whitespace
+                {
+                    case "Driver":
+                        _logger.LogInformation("Redirecting to Driver Panel");
+                        redirectResult = RedirectToAction("DriverPanel", "Staff");
+                        break;
+                    case "KitchenStaff":
+                        _logger.LogInformation("Redirecting to Kitchen Panel");
+                        redirectResult = RedirectToAction("KitchenPanel", "Staff");
+                        break;
+                    case "Admin":
+                        _logger.LogInformation("Redirecting to Admin Panel");
+                        redirectResult = RedirectToAction("RestaurantManagement", "Admin");
+                        break;
+                    default:
+                        _logger.LogInformation("Redirecting to Home Index");
+                        redirectResult = RedirectToAction("Index", "Home");
+                        break;
+                }
+
+                _logger.LogInformation($"Redirect result type: {redirectResult.GetType().Name}");
+                return redirectResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception during login: {ex.Message}");
+                _logger.LogError($"Stack trace: {ex.StackTrace}");
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred during login.");
+                return View("LoginSignup", new LoginSignupModel { Login = model });
+            }
         }
 
         [HttpPost]
@@ -182,6 +247,13 @@ namespace projet_info_finale.Controllers
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("LoginSignup");
         }
 
         private string HashPassword(string password)
