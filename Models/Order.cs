@@ -1,11 +1,21 @@
 ﻿namespace projet_info_finale.Models
 {
+    public enum OrderStatus
+    {
+        Pending,
+        Preparing,
+        [System.ComponentModel.DataAnnotations.Schema.Column(TypeName = "Out for Delivery")]
+        OutForDelivery,
+        Completed,
+        Cancelled
+    }
+
     public class Order
     {
         public int OrderID { get; set; }
         public int UserID { get; set; }
         public int RestaurantID { get; set; }
-        public string OrderStatus { get; set; } // Pending, Accepted, Preparing, Delivering
+        public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending; // Set default value
         public decimal TotalPrice { get; set; }
         public Users User { get; set; }
         public Restaurant Restaurant { get; set; }

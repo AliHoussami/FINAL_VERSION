@@ -105,7 +105,7 @@ namespace projet_info_finale.Controllers
                     Address = model.Address ?? "Not provided",
                     City = model.City ?? "Not provided",
                     PostalCode = model.PostalCode ?? "Not provided",
-                    UserType = "Customer"
+                    UserType = UserType.Customer // Use enum instead of string
                 };
 
                 _context.Users.Add(newUser);
@@ -171,7 +171,7 @@ namespace projet_info_finale.Controllers
                 FirstName = firstName,
                 LastName = lastName,
                 Email = email,
-                UserType = "Customer",
+                UserType = UserType.Customer, // Use enum instead of string
                 Address = "Not provided",
                 City = "Not provided",
                 PostalCode = "Not provided",
@@ -229,7 +229,7 @@ namespace projet_info_finale.Controllers
             try
             {
                 // Check if the user exists and is an admin
-                var adminUser = _context.Users.FirstOrDefault(u => u.Username == model.Username && u.UserType == "Admin");
+                var adminUser = _context.Users.FirstOrDefault(u => u.Username == model.Username && u.UserType == UserType.Admin);
 
                 if (adminUser == null || !VerifyPassword(model.Password, adminUser.PasswordHash))
                 {

@@ -137,32 +137,40 @@ namespace projet_info_finale.Controllers
                 TempData["Message"] = $"Order placed successfully! Please pay {totalAmount:C} on delivery.";
             }
 
-            // Create a new order
-            var order = new Order
+            try
             {
-                UserID = parsedUserId, // Set the correct UserID
-                RestaurantID = 1, // Replace with actual logic to determine the restaurant ID
-                OrderStatus = "Pending",
-                TotalPrice = totalAmount,
-                OrderItems = cartItems.Select(ci => new OrderItem
+                var order = new Order
                 {
-                    MenuItemID = ci.MenuItemID,
-                    Quantity = ci.Quantity,
-                    ItemPrice = ci.TotalPrice,
-                    Customization = ci.Customizations
-                }).ToList()
-            };
+                    UserID = parsedUserId, // Set the correct UserID
+                    RestaurantID = 1, // Replace with actual logic to determine the restaurant ID
+                    OrderStatus = OrderStatus.Pending, // Changed from string to enum
+                    TotalPrice = totalAmount,
+                    OrderItems = cartItems.Select(ci => new OrderItem
+                    {
+                        MenuItemID = ci.MenuItemID,
+                        Quantity = ci.Quantity,
+                        ItemPrice = ci.TotalPrice,
+                        Customization = ci.Customizations ?? string.Empty
+                    }).ToList()
+                };
 
-            _context.Orders.Add(order);
+                _context.Orders.Add(order);
 
-            // Clear the user's cart
-            _context.CartItems.RemoveRange(cartItems);
+                // Clear the user's cart
+                _context.CartItems.RemoveRange(cartItems);
 
-            // Save changes
-            await _context.SaveChangesAsync();
+                // Save changes
+                await _context.SaveChangesAsync();
 
-            // Redirect to confirmation page
-            return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
+                // Redirect to confirmation page
+                return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                TempData["Error"] = "An error occurred while processing your order.";
+                return RedirectToAction("Index");
+            }
         }
 
         public async Task<IActionResult> OrderConfirmation(int orderId)

@@ -31,25 +31,19 @@ namespace projet_info_finale.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
         {
-            // Trim the status to ensure no extra spaces
-            status = status.Trim();
-
-            // Validate the status value against allowed enum values
-            var allowedStatuses = new[] { "Pending", "Preparing", "Out for Delivery", "Completed", "Cancelled" };
-            if (!allowedStatuses.Contains(status))
+            if (!Enum.TryParse<OrderStatus>(status, out OrderStatus newStatus))
             {
                 TempData["Error"] = "Invalid order status.";
                 return RedirectToAction("Orders");
             }
 
             var order = await _context.Orders.FindAsync(orderId);
-
             if (order == null)
             {
                 return NotFound();
             }
 
-            order.OrderStatus = status;
+            order.OrderStatus = newStatus;
 
             try
             {

@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<projet_info_finale.Models.Order>
+@using projet_info_finale.Models
 
 @{
     ViewData["Title"] = "Orders";
@@ -36,9 +37,11 @@
                         <form asp-action="UpdateOrderStatus" method="post" style="display:inline;">
                             <input type="hidden" name="orderId" value="@order.OrderID" />
                             <select name="status" class="form-select d-inline w-auto">
-                                @foreach (var status in new[] { "Pending", "Accepted", "Preparing", "Delivering", "Completed" })
+                                @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
                                 {
-                                    <option value="@status" selected="@(order.OrderStatus == status ? "selected" : null)">@status</option>
+                                    <option value="@status" selected="@(order.OrderStatus == status)">
+                                        @status
+                                    </option>
                                 }
                             </select>
                             <button type="submit" class="btn btn-primary btn-sm">Update</button>

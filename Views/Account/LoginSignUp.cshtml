@@ -16,10 +16,15 @@
                 <button class="btn btn-gradient btn-lg" id="show-signup">Signup</button>
             </div>
 
-            <!-- Admin Login -->
-            <a href="@Url.Action("RestaurantManagement", "Admin")" class="btn btn-danger btn-lg mb-4">
-                Admin Panel
-            </a>
+            <!-- Admin and Staff Panels -->
+            <div class="d-grid gap-3 mb-4">
+                <a href="@Url.Action("RestaurantManagement", "Admin")" class="btn btn-danger btn-lg">
+                    <i class="fas fa-user-shield"></i> Admin Panel
+                </a>
+                <a href="@Url.Action("StaffSelection", "Staff")" class="btn btn-info btn-lg">
+                    <i class="fas fa-user-cog"></i> Staff Panel
+                </a>
+            </div>
 
             <!-- Login Form -->
             <div id="login-form" class="form-container mt-4" style="display: @(activeTab == "login" ? "block" : "none");">

@@ -1,7 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace projet_info_finale.Models
 {
+    public enum UserType
+    {
+        Customer,
+        Driver,
+        Admin,
+        KitchenStaff
+    }
+
     public class Users
     {
         [Key]
@@ -28,8 +37,8 @@ namespace projet_info_finale.Models
         public string PasswordHash { get; set; }
 
         [Required]
-        [StringLength(50)]
-        public string UserType { get; set; }
+        [Column(TypeName = "enum('Customer','Driver','Admin','KitchenStaff')")]
+        public UserType UserType { get; set; }
 
         [StringLength(255)]
         public string Address { get; set; }

@@ -1,4 +1,5 @@
 ﻿@model projet_info_finale.Models.Order
+@using projet_info_finale.Models
 
 @{
     ViewData["Title"] = "Order Confirmation";
@@ -20,7 +21,7 @@
         <p><strong>Total Price:</strong> @(Model?.TotalPrice.ToString("C") ?? "0.00")</p>
         <p>
             <strong>Status:</strong>
-            <span class="badge @((Model?.OrderStatus == "Completed" ? "badge-success" : "badge-warning"))">
+            <span class="badge @(Model?.OrderStatus == OrderStatus.Completed ? "badge-success" : "badge-warning")">
                 @Model?.OrderStatus
             </span>
         </p>

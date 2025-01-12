@@ -1,0 +1,96 @@
+@model List<Order>
+@using projet_info_finale.Models
+
+@{
+    ViewData["Title"] = "Staff Panel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewBag.StaffRole Panel - @ViewBag.StaffName</h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No orders available at this time.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Restaurant</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Current Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td>@order.OrderID</td>
+                            <td>@order.User.FirstName @order.User.LastName</td>
+                            <td>@order.Restaurant.RestaurantName</td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    @foreach (var item in order.OrderItems)
+                                    {
+                                        <li>@item.MenuItem.ItemName x @item.Quantity</li>
+                                    }
+                                </ul>
+                            </td>
+                            <td>$@order.TotalPrice.ToString("F2")</td>
+                            <td>@order.OrderStatus</td>
+                            <td>
+                                <select class="form-select status-select" data-order-id="@order.OrderID">
+                                    <option value="Pending" selected="@(order.OrderStatus == OrderStatus.Pending)">Pending</option>
+                                    <option value="Preparing" selected="@(order.OrderStatus == OrderStatus.Preparing)">Preparing</option>
+                                    <option value="OutForDelivery" selected="@(order.OrderStatus == OrderStatus.OutForDelivery)">Out for Delivery</option>
+                                    <option value="Completed" selected="@(order.OrderStatus == OrderStatus.Completed)">Completed</option>
+                                    <option value="Cancelled" selected="@(order.OrderStatus == OrderStatus.Cancelled)">Cancelled</option>
+                                </select>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.status-select').change(function() {
+                const orderId = $(this).data('order-id');
+                const newStatus = $(this).val();
+
+                $.post('/Staff/UpdateOrderStatus', { orderId: orderId, newStatus: newStatus })
+                    .done(function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload(); // Reload to reflect changes
+                        } else {
+                            alert('Failed to update status: ' + response.message);
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        alert('An error occurred: ' + error);
+                    });
+            });
+        });
+    </script>
+}
