@@ -34,13 +34,19 @@ namespace projet_info_finale
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
             })
-            .AddCookie()
-            .AddGoogle(googleOptions =>
-            {
-                googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-                googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-                googleOptions.CallbackPath = "/signin-google"; // Set this to the old URL format
-            });
+.AddCookie(options =>
+{
+    options.LoginPath = "/Account/LoginSignup"; // Redirect to login
+    options.LogoutPath = "/Account/Logout"; // Redirect to logout
+    options.ExpireTimeSpan = TimeSpan.FromDays(7); // Set cookie expiration to 7 days
+    options.SlidingExpiration = true; // Sliding expiration
+})
+.AddGoogle(googleOptions =>
+{
+    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    googleOptions.CallbackPath = "/signin-google"; // Matches Google Console redirect URI
+});
 
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();

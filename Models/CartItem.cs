@@ -7,6 +7,7 @@
         public string? Customizations { get; set; } // Additional ingredients or notes
         public int Quantity { get; set; }
         public decimal TotalPrice { get; set; }
+        public int UserID { get; set; }
 
         // Navigation properties
         public MenuItem MenuItem { get; set; }

@@ -31,7 +31,7 @@ namespace projet_info_finale.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(LoginModel model)
+        public async Task<IActionResult> Login(LoginModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -41,8 +41,10 @@ namespace projet_info_finale.Controllers
 
             try
             {
+                // Fetch the user from the database by username
                 var user = _context.Users.FirstOrDefault(u => u.Username == model.Username);
 
+                // Check if the user exists and the password is valid
                 if (user == null || !VerifyPassword(model.Password, user.PasswordHash))
                 {
                     ModelState.AddModelError(string.Empty, "Invalid username or password.");
@@ -50,15 +52,28 @@ namespace projet_info_finale.Controllers
                     return View("LoginSignup", new LoginSignupModel { Login = model });
                 }
 
-                // Successful login - redirect to Home/Index
+                // Set up authentication claims
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()), // UserID claim
+            new Claim(ClaimTypes.Name, user.Username) // Username claim
+        };
+
+                // Create claims identity and sign the user in
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                // Redirect to the home page after successful login
                 return RedirectToAction("Index", "Home");
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
+                // Log the error and display a generic error message
                 _logger.LogError($"Error during login: {ex.Message}");
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again.");
             }
 
+            // Return to the login page with an active tab
             ViewBag.ActiveTab = "login";
             return View("LoginSignup", new LoginSignupModel { Login = model });
         }
@@ -107,7 +122,6 @@ namespace projet_info_finale.Controllers
                 return View("LoginSignup", new LoginSignupModel { Signup = model });
             }
         }
-
         // Google Login action
         [HttpGet("LoginWithGoogle")]
         public IActionResult LoginWithGoogle()
@@ -202,5 +216,40 @@ namespace projet_info_finale.Controllers
                 return hashedInput == storedHashedPassword;
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AdminLogin(LoginModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ActiveTab = "login"; // Set active tab to login
+                return View("LoginSignup", new LoginSignupModel { Login = model });
+            }
+
+            try
+            {
+                // Check if the user exists and is an admin
+                var adminUser = _context.Users.FirstOrDefault(u => u.Username == model.Username && u.UserType == "Admin");
+
+                if (adminUser == null || !VerifyPassword(model.Password, adminUser.PasswordHash))
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid admin username or password.");
+                    ViewBag.ActiveTab = "login"; // Set active tab to login
+                    return View("LoginSignup", new LoginSignupModel { Login = model });
+                }
+
+                // Successful admin login
+                // You can set admin-specific logic here if needed, like redirecting to an Admin Dashboard
+                return RedirectToAction("AdminDashboard", "Admin"); // Assuming there's an AdminDashboard action
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error during admin login: {ex.Message}");
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
+            }
+
+            ViewBag.ActiveTab = "login"; // Set active tab to login
+            return View("LoginSignup", new LoginSignupModel { Login = model });
+        }        
     }
 }

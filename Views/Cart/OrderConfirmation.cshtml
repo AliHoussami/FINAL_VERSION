@@ -7,22 +7,21 @@
 <div class="container mt-5">
     <h2 class="text-gradient text-center mb-4">Order Confirmation</h2>
 
-    <!-- Success Message -->
-    <div class="alert alert-success shadow-sm text-center fs-5">
+    <div class="alert alert-success">
         <strong>Thank you for your order!</strong> Your order has been placed successfully.
     </div>
 
     <!-- Order Details -->
     <div class="order-details p-4 shadow-sm rounded bg-white mt-4">
-        <p><strong>Order ID:</strong> @Model.OrderID</p>
-        <p><strong>Customer:</strong> @Model.User.FirstName @Model.User.LastName</p>
-        <p><strong>Restaurant:</strong> @Model.Restaurant.RestaurantName</p>
+        <p><strong>Order ID:</strong> @Model?.OrderID</p>
+        <p><strong>Customer:</strong> @(Model?.User?.FirstName ?? "Unknown") @(Model?.User?.LastName ?? "User")</p>
+        <p><strong>Restaurant:</strong> @(Model?.Restaurant?.RestaurantName ?? "Unknown")</p>
         <p><strong>Date:</strong> @DateTime.Now.ToString("f")</p>
-        <p><strong>Total Price:</strong> @Model.TotalPrice.ToString("C")</p>
+        <p><strong>Total Price:</strong> @(Model?.TotalPrice.ToString("C") ?? "0.00")</p>
         <p>
             <strong>Status:</strong>
-            <span class="badge @((Model.OrderStatus == "Completed" ? "badge-success" : "badge-warning"))">
-                @Model.OrderStatus
+            <span class="badge @((Model?.OrderStatus == "Completed" ? "badge-success" : "badge-warning"))">
+                @Model?.OrderStatus
             </span>
         </p>
     </div>

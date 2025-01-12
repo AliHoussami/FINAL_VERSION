@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using projet_info_finale.Models;
+using System.Security.Claims;
 
 namespace projet_info_finale.Controllers
 {
@@ -48,12 +49,23 @@ namespace projet_info_finale.Controllers
                 return NotFound();
             }
 
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["Error"] = "You must be logged in to add items to the cart.";
+                return RedirectToAction("LoginSignup", "Account");
+            }
+
+            int parsedUserId = int.Parse(userId);
+
             var cartItem = new CartItem
             {
                 MenuItemID = menuItemId,
                 Customizations = customizations,
                 Quantity = quantity,
-                TotalPrice = menuItem.Price * quantity
+                TotalPrice = menuItem.Price * quantity,
+                UserID = parsedUserId // Ensure UserID is set
             };
 
             _context.CartItems.Add(cartItem);
@@ -61,6 +73,7 @@ namespace projet_info_finale.Controllers
 
             return RedirectToAction("Index");
         }
+
 
         // POST: /Cart/Remove/{cartItemId}
         [HttpPost]
@@ -83,12 +96,22 @@ namespace projet_info_finale.Controllers
         [HttpPost]
         public async Task<IActionResult> Checkout(string paymentMethod, string? cardNumber, string? expiryDate, string? cvv)
         {
-            // Fetch the current user's ID (Replace with actual authenticated user logic)
-            int userId = 1; // Assume 1 for testing, replace with actual logged-in user's ID
-            int restaurantId = 1; // Replace with logic to fetch restaurant ID based on cart items
+            // Fetch the current user's ID from authentication claims
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Fetch cart items
-            var cartItems = await _context.CartItems.Include(ci => ci.MenuItem).ToListAsync();
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["Error"] = "You must be logged in to place an order.";
+                return RedirectToAction("LoginSignup", "Account");
+            }
+
+            int parsedUserId = int.Parse(userId);
+
+            // Fetch cart items for the logged-in user
+            var cartItems = await _context.CartItems
+                .Where(ci => ci.UserID == parsedUserId) // Ensure cart items belong to the logged-in user
+                .Include(ci => ci.MenuItem)
+                .ToListAsync();
 
             if (!cartItems.Any())
             {
@@ -107,41 +130,32 @@ namespace projet_info_finale.Controllers
                     return RedirectToAction("ProceedToPayment");
                 }
 
-                // Simulate successful card payment
                 TempData["Message"] = $"Payment successful! Your total amount of {totalAmount:C} has been charged to your card.";
             }
             else
             {
-                // Simulate cash on delivery
                 TempData["Message"] = $"Order placed successfully! Please pay {totalAmount:C} on delivery.";
             }
 
             // Create a new order
             var order = new Order
             {
-                UserID = userId,
-                RestaurantID = restaurantId,
-                OrderStatus = "Pending", // Initial order status
+                UserID = parsedUserId, // Set the correct UserID
+                RestaurantID = 1, // Replace with actual logic to determine the restaurant ID
+                OrderStatus = "Pending",
                 TotalPrice = totalAmount,
-                OrderItems = new List<OrderItem>()
-            };
-
-            // Add order items
-            foreach (var cartItem in cartItems)
-            {
-                var orderItem = new OrderItem
+                OrderItems = cartItems.Select(ci => new OrderItem
                 {
-                    MenuItemID = cartItem.MenuItemID,
-                    Quantity = cartItem.Quantity,
-                    ItemPrice = cartItem.TotalPrice
-                };
-
-                order.OrderItems.Add(orderItem);
-            }
+                    MenuItemID = ci.MenuItemID,
+                    Quantity = ci.Quantity,
+                    ItemPrice = ci.TotalPrice,
+                    Customization = ci.Customizations
+                }).ToList()
+            };
 
             _context.Orders.Add(order);
 
-            // Clear the cart
+            // Clear the user's cart
             _context.CartItems.RemoveRange(cartItems);
 
             // Save changes
@@ -150,6 +164,7 @@ namespace projet_info_finale.Controllers
             // Redirect to confirmation page
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
         }
+
         public async Task<IActionResult> OrderConfirmation(int orderId)
         {
             var order = await _context.Orders

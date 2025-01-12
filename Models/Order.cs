@@ -9,6 +9,7 @@
         public decimal TotalPrice { get; set; }
         public Users User { get; set; }
         public Restaurant Restaurant { get; set; }
+        
         public ICollection<OrderItem> OrderItems { get; set; }
     }
 
@@ -19,6 +20,7 @@
         public int MenuItemID { get; set; }
         public int Quantity { get; set; }
         public decimal ItemPrice { get; set; }
+        public string Customization { get; set; }
         public Order Order { get; set; }
         public MenuItem MenuItem { get; set; }
     }
